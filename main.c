@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <png.h>
 #include <stdlib.h>
-
+#include <gpiod.h>
 
 
 
@@ -174,6 +174,14 @@ void draw_text(char* text, GLuint font, float x, float y) {
 
 int main() {
 	
+	struct gpiod_chip* chip = gpiod_chip_open("/dev/gpiochip0");
+	struct gpiod_line* test_line = gpiod_chip_get_line(chip, 21);
+	gpiod_line_request_output(test_line, "test_line", 0);
+	
+	gpiod_line_set_value(test_line, 1);
+	
+	
+	
 	glfwSetErrorCallback(error_callback);
 	if (!glfwInit()) {
 		printf("GLFW failed to initialize. damn.\n");
@@ -219,6 +227,8 @@ int main() {
 	}
 	
 	
+	gpiod_line_release(test_line);
+	gpiod_chip_close(chip);
 	
 	glfwDestroyWindow(window);
 	printf("\nvvv glfwTerminate about to segfault lol\n");
