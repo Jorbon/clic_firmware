@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <png.h>
 #include <stdlib.h>
-#include <gpiod.h>
+//#include <gpiod.h>
 
 
 
@@ -19,8 +19,8 @@ typedef struct {
 } Image;
 
 
-static const unsigned int display_width = 1920;
-static const unsigned int display_height = 1080;
+static const unsigned int display_width = 320;
+static const unsigned int display_height = 240;
 static const float widthf = (float) display_width;
 static const float heightf = (float) display_height;
 static const float widthf_inv = 1.0 / widthf;
@@ -174,11 +174,11 @@ void draw_text(char* text, GLuint font, float x, float y) {
 
 int main() {
 	
-	struct gpiod_chip* chip = gpiod_chip_open("/dev/gpiochip0");
-	struct gpiod_line* test_line = gpiod_chip_get_line(chip, 21);
-	gpiod_line_request_output(test_line, "test_line", 0);
+	//struct gpiod_chip* chip = gpiod_chip_open("/dev/gpiochip0");
+	//struct gpiod_line* test_line = gpiod_chip_get_line(chip, 21);
+	//gpiod_line_request_output(test_line, "test_line", 0);
 	
-	gpiod_line_set_value(test_line, 1);
+	//gpiod_line_set_value(test_line, 1);
 	
 	
 	
@@ -201,10 +201,10 @@ int main() {
 	
 	
 	
-	GLuint test_tex = load_generic_image("/root/clic_firmware/assets/mc.png");
+	GLuint test_tex = load_generic_image("/home/clic/clic_firmware/assets/mc.png");
 	if (!test_tex) return 1;
 	
-	GLuint font = load_font("/root/clic_firmware/assets/consolas16.png");
+	GLuint font = load_font("/home/clic/clic_firmware/assets/consolas16.png");
 	if (!font) return 1;
 
 	
@@ -216,8 +216,9 @@ int main() {
 		
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		draw_image(test_tex, 0.2, 0.2, 0.6, 0.6);
-		draw_text("Hi test text for rendering (%#*!^&(%)^#@*(&'~`_--+=,<>./?:;[]{}\\|", font, 0.1, 0.1);
+		//draw_image(test_tex, 0.2, 0.2, 0.6, 0.6);
+		//draw_text("Hi test text for rendering (%#*!^&(%)^#@*(&'~`_--+=,<>./?:;[]{}\\|", font, 0.1, 0.1);
+		draw_image(test_tex, 0.0, 0.0, 1.0, 1.0);
 		
 		
 		glfwSwapBuffers(window);
@@ -227,11 +228,10 @@ int main() {
 	}
 	
 	
-	gpiod_line_release(test_line);
-	gpiod_chip_close(chip);
+	//gpiod_line_release(test_line);
+	//gpiod_chip_close(chip);
 	
 	glfwDestroyWindow(window);
-	printf("\nvvv glfwTerminate about to segfault lol\n");
 	glfwTerminate();
 	return 0;
 }
