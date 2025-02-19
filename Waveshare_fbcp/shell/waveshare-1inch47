@@ -1,0 +1,33 @@
+j=$(uname -n)
+b=$(getconf LONG_BIT)
+echo "The operating system :$j $b bit"
+if test "$j" = "raspberry" || test "$j" = "raspberrypi";then
+
+    if [ -d "/home/pi/Waveshare_fbcp/build" ]; then
+        sudo rm -rf /home/pi/Waveshare_fbcp/build
+    fi
+    mkdir /home/pi/Waveshare_fbcp/build
+    sudo apt update
+    sudo apt install cmake -y
+    sudo apt install unzip -y
+    if test "$b" = "32";then
+        sudo cp /home/pi/Waveshare_fbcp/shell/boot/32/waveshare-1inch47.txt /boot/config.txt
+    else
+        sudo cp /home/pi/Waveshare_fbcp/shell/boot/64/waveshare-1inch47.txt /boot/config.txt
+    fi
+    sudo cp /home/pi/Waveshare_fbcp/shell/etc/rc.local /etc/rc.local
+
+    cd /home/pi/Waveshare_fbcp/build
+    sudo cmake -DSPI_BUS_CLOCK_DIVISOR=20 -DWAVESHARE_1INCH47_LCD=ON -DBACKLIGHT_CONTROL=ON -DSTATISTICS=0 ..
+    sudo make -j
+    if [ -x "/usr/local/bin/fbcp" ]; then
+    sudo rm -rf /usr/local/bin/fbcp
+    fi
+    sudo cp ./fbcp /usr/local/bin/fbcp
+
+    echo "The system is configured."
+    echo "The system will restart."
+    sudo reboot
+else
+echo "This script only works if the hostname is raspberry or raspberrypi"
+fi

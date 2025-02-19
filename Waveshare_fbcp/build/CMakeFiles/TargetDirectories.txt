@@ -1,0 +1,3 @@
+/home/clic/clic_firmware/Waveshare_fbcp/build/CMakeFiles/rebuild_cache.dir
+/home/clic/clic_firmware/Waveshare_fbcp/build/CMakeFiles/edit_cache.dir
+/home/clic/clic_firmware/Waveshare_fbcp/build/CMakeFiles/fbcp.dir
