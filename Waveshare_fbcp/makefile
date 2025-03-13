@@ -1,9 +1,7 @@
 
 spi_divisor=20
 
-dc_pin=25
-reset_pin=27
-backlight_pin=18
+dc_pin=18
 
 main:
 	cd build; \
@@ -13,7 +11,5 @@ main:
 		-DWAVESHARE_2INCH4_LCD=ON \
 		-DSTATISTICS=0 \
 		-DGPIO_TFT_DATA_CONTROL=$(dc_pin) \
-		-DGPIO_TFT_RESET_PIN=$(reset_pin) \
-		-DGPIO_TFT_BACKLIGHT=$(backlight_pin) \
 		..; \
 	make -j

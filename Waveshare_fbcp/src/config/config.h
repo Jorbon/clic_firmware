@@ -218,15 +218,16 @@
 
 // Which state of the LOW_BATTERY_PIN is considered to be low battery. Note that the GPIO pin must be
 // in the correct state (input with pull-up/pull-down resistor) before the program is started.
-#define LOW_BATTERY_IS_ACTIVE_HIGH 0
+//#define LOW_BATTERY_IS_ACTIVE_HIGH 0
 
 // Polling interval (in micro-second) for the low battery pin.
-#define LOW_BATTERY_POLLING_INTERVAL 1000000
+//#define LOW_BATTERY_POLLING_INTERVAL 1000000
 
 // If less than this much % of the screen changes per frame, the screen is considered to be inactive, and
 // the display backlight can automatically turn off, if TURN_DISPLAY_OFF_AFTER_USECS_OF_INACTIVITY is 
 // defined.
-#define DISPLAY_CONSIDERED_INACTIVE_PERCENTAGE (5.0 / 100.0)
+#define DISPLAY_CONSIDERED_INACTIVE_PERCENTAGE 0.0
+	//(5.0 / 100.0)
 
 #ifndef KERNEL_MODULE
 
