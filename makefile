@@ -1,11 +1,9 @@
 
 
-main: br
-
 build:
-	gcc main.c -o gui -lglfw -lGL -lpng #-lgpiod
+	gcc main.c -o gui -lglfw -lGL -lpng -lgpiod
 run:
-	xinit
+	sudo xinit
 
 br: b r
 b: build

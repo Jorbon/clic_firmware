@@ -2,7 +2,17 @@
 #include <GLFW/glfw3.h>
 #include <png.h>
 #include <stdlib.h>
-//#include <gpiod.h>
+#include <string.h>
+#include <gpiod.h>
+
+
+const unsigned int GPIO_CLIC   = 13;
+const unsigned int GPIO_CENTER = 12;
+const unsigned int GPIO_LEFT   =  1;
+const unsigned int GPIO_RIGHT  = 18;
+const unsigned int GPIO_UP     = 19;
+const unsigned int GPIO_DOWN   =  2;
+const unsigned int GPIO_LED    =  6;
 
 
 
@@ -19,14 +29,14 @@ typedef struct {
 } Image;
 
 
-static const unsigned int display_width = 320;
-static const unsigned int display_height = 240;
-static const float widthf = (float) display_width;
-static const float heightf = (float) display_height;
-static const float widthf_inv = 1.0 / widthf;
-static const float heightf_inv = 1.0 / heightf;
-static const float aratio = widthf * heightf_inv;
-static const float aratio_inv = heightf * widthf_inv;
+const unsigned int display_width = 320;
+const unsigned int display_height = 240;
+const float widthf = (float) display_width;
+const float heightf = (float) display_height;
+const float widthf_inv = 1.0 / widthf;
+const float heightf_inv = 1.0 / heightf;
+const float aratio = widthf * heightf_inv;
+const float aratio_inv = heightf * widthf_inv;
 
 
 Image load_png(const char* path) {
@@ -45,7 +55,8 @@ Image load_png(const char* path) {
 		return img;
 	}
 	
-	png_structp png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	png_structp png_ptr = png_create_read_struct(
+			PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 	png_infop info_ptr = png_create_info_struct(png_ptr);
 	
 	png_init_io(png_ptr, file_pointer);
@@ -53,16 +64,27 @@ Image load_png(const char* path) {
 	png_read_info(png_ptr, info_ptr);
 	
 	int bit_depth, color_type;
-	png_get_IHDR(png_ptr, info_ptr, &img.width, &img.height, &bit_depth, &color_type, NULL, NULL, NULL);
+	png_get_IHDR(png_ptr, info_ptr, &img.width, &img.height, 
+			&bit_depth, &color_type, NULL, NULL, NULL);
+
 	if (bit_depth == 16) png_set_strip_16(png_ptr);
-	if (color_type == PNG_COLOR_TYPE_PALETTE) png_set_palette_to_rgb(png_ptr);
-	if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) png_set_expand_gray_1_2_4_to_8(png_ptr);
-	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(png_ptr);
-	if (color_type == PNG_COLOR_TYPE_RGB || color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_PALETTE) png_set_filler(png_ptr, 255, PNG_FILLER_AFTER);
-	if (color_type == PNG_COLOR_TYPE_GRAY || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) png_set_gray_to_rgb(png_ptr);
+	if (color_type == PNG_COLOR_TYPE_PALETTE) 
+		png_set_palette_to_rgb(png_ptr);
+	if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) 
+		png_set_expand_gray_1_2_4_to_8(png_ptr);
+	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) 
+		png_set_tRNS_to_alpha(png_ptr);
+	if (color_type == PNG_COLOR_TYPE_RGB 
+	 || color_type == PNG_COLOR_TYPE_GRAY 
+	 || color_type == PNG_COLOR_TYPE_PALETTE) 
+		png_set_filler(png_ptr, 255, PNG_FILLER_AFTER);
+	if (color_type == PNG_COLOR_TYPE_GRAY 
+	 || color_type == PNG_COLOR_TYPE_GRAY_ALPHA) 
+		png_set_gray_to_rgb(png_ptr);
+	
 	//png_set_gamma(png_ptr, display_exponent, gamma);
 	png_read_update_info(png_ptr, info_ptr);
-
+	
 	unsigned int bytes_per_row = png_get_rowbytes(png_ptr, info_ptr);
 	img.channels = png_get_channels(png_ptr, info_ptr);
 	
@@ -94,7 +116,8 @@ GLuint init_texture(Image img) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width, img.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img.data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.width, img.height, 
+			0, GL_RGBA, GL_UNSIGNED_BYTE, img.data);
 
 	return texture;
 }
@@ -123,7 +146,8 @@ GLuint load_font(const char* path) {
 
 
 
-void draw_quad(float x, float y, float width, float height, float u_min, float u_max, float v_min, float v_max) {
+void draw_quad(float x, float y, float width, float height, 
+		float u_min, float u_max, float v_min, float v_max) {
 	float x1 = x * 2.0 - 1.0;
 	float x2 = (x + width) * 2.0 - 1.0;
 	float y1 = 1.0 - y * 2.0;
@@ -157,10 +181,15 @@ void draw_text(char* text, GLuint font, float x, float y) {
 		c = *text;
 		if (c == 0) break;
 		
-		float u = ((float) (c & 0b1111) + (1.0 - char_widthf * char_sizef_inv) * 0.5) * 0.0625;
+		float u = ((float) (c & 0b1111) + 
+				(1.0 - char_widthf * char_sizef_inv) * 0.5) 
+				* 0.0625;
 		float v = (float) ((c >> 4) & 0b111) * 0.125;
 		
-		draw_quad(x, y, char_widthf * widthf_inv, char_sizef * heightf_inv, u, u + char_widthf * char_sizef_inv * 0.0625, v, v + 0.125);
+		draw_quad(x, y, char_widthf * widthf_inv, 
+				char_sizef * heightf_inv, 
+				u, u + char_widthf * char_sizef_inv * 0.0625, 
+				v, v + 0.125);
 		x += char_widthf * widthf_inv;
 		
 		text += 1;
@@ -172,28 +201,86 @@ void draw_text(char* text, GLuint font, float x, float y) {
 
 
 
+struct gpiod_chip* chip;
+struct gpiod_line_request_config button_config;
+struct gpiod_line_bulk button_lines;
+struct gpiod_line_request_config led_config;
+struct gpiod_line_bulk led_lines;
+
+const unsigned int LED_PINS = {GPIO_LED};
+const unsigned int BUTTON_PINS = {GPIO_CLIC, GPIO_CENTER, 
+	GPIO_LEFT, GPIO_RIGHT, GPIO_UP, GPIO_DOWN);
+
+GLFWwindow* window;
+
+
+enum 
+
+
+
+int get_button(enum Button) {
+	gpiod_line_get_value_bulk(
+}
+
+int set_led(int state) {
+	return gpiod_line_set_value_bulk(&led_lines, &state);
+}
+
+
+void clean_exit(int code, char* message) {
+	glfwDestroyWindow(window);
+	glfwTerminate();
+	gpiod_line_release_bulk(&led_lines);
+	gpiod_line_release_bulk(&button_lines);
+	gpiod_chip_close(chip);
+	
+	printf("%s\n", message);
+	exit(code);
+}
+
+
 int main() {
+	int error;
+
+	struct gpiod_chip* chip = gpiod_chip_open("/dev/gpiochip0");
+	if (!chip) clean_exit(-1, "No gpio chip open. damn.");
 	
-	//struct gpiod_chip* chip = gpiod_chip_open("/dev/gpiochip0");
-	//struct gpiod_line* test_line = gpiod_chip_get_line(chip, 21);
-	//gpiod_line_request_output(test_line, "test_line", 0);
+	error = gpiod_chip_get_lines(chip, BUTTON_PINS, 6, &button_lines);
+	if (error) clean_exit(-1, "No lines. damn.");
 	
-	//gpiod_line_set_value(test_line, 1);
+	error = gpiod_chip_get_lines(chip, LED_PINS, 1, &led_lines);
+	if (error) clean_exit(-1, "No lines. damn.");
+	
+	memset(&button_config, 0, sizeof(button_config));
+	button_config.consumer = "clic";
+	button_config.request_type = GPIOD_LINE_REQUEST_DIRECTION_INPUT;
+	button_config.flags = 0;
+	
+	memset(&led_config, 0, sizeof(led_config));
+	led_config.consumer = "clic";
+	led_config.request_type = GPIOD_LINE_REQUEST_DIRECTION_OUTPUT;
+	led_config.flags = 0;
+	
+	error = gpiod_line_request_bulk(&button_lines, &button_config, NULL);
+	if (error) clean_exit(-1, "No get lines. damn.");
+	
+	int value = 0;
+	error = gpiod_line_request_bulk(&led_lines, &led_config, &value);
+	if (error) clean_exit(-1, "No get lines. damn.");
+	
+	
+	set_led(1);
+	
+	
 	
 	
 	
 	glfwSetErrorCallback(error_callback);
-	if (!glfwInit()) {
-		printf("GLFW failed to initialize. damn.\n");
-		return 1;
-	}
+	if (!glfwInit()) clean_exit(-1, "GLFW failed to initialize. damn.");
 	
-	GLFWwindow* window = glfwCreateWindow(display_width, display_height, "super cool window name", NULL, NULL);
-	if (!window) {
-		glfwTerminate();
-		printf("Failed to create GLFW window. damn.\n");
-		return 1;
-	}
+	window = glfwCreateWindow(display_width, display_height, 
+			"name", NULL, NULL);
+	if (!window) clean_exit(-1, "Failed to create GLFW window. damn.");
 	
 	glfwMakeContextCurrent(window);
 	glEnable(GL_TEXTURE_2D);
@@ -201,10 +288,12 @@ int main() {
 	
 	
 	
-	GLuint test_tex = load_generic_image("/home/clic/clic_firmware/assets/mc.png");
-	if (!test_tex) return 1;
+	GLuint test_tex = load_generic_image(
+			"/home/clic/clic_firmware/assets/mc.png");
+	if (!test_tex) clean_exit(-1, "No load test tex. damn.");
 	
-	GLuint font = load_font("/home/clic/clic_firmware/assets/consolas16.png");
+	GLuint font = load_font(
+			"/home/clic/clic_firmware/assets/consolas16.png");
 	if (!font) return 1;
 
 	
@@ -216,9 +305,9 @@ int main() {
 		
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		//draw_image(test_tex, 0.2, 0.2, 0.6, 0.6);
-		//draw_text("Hi test text for rendering (%#*!^&(%)^#@*(&'~`_--+=,<>./?:;[]{}\\|", font, 0.1, 0.1);
 		draw_image(test_tex, 0.0, 0.0, 1.0, 1.0);
+		draw_text("Hi test text for rendering (%#*!^&(%)^#@*(&'~`_--+=,<>./?:;[]{}\\|", 
+				font, 0.1, 0.1);
 		
 		
 		glfwSwapBuffers(window);
@@ -228,10 +317,6 @@ int main() {
 	}
 	
 	
-	//gpiod_line_release(test_line);
-	//gpiod_chip_close(chip);
-	
-	glfwDestroyWindow(window);
-	glfwTerminate();
+	clean_exit(0, "Clic closed without errors.");
 	return 0;
 }
