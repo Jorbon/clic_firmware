@@ -1,7 +1,7 @@
 
 
 build:
-	gcc main.c -o gui -lglfw -lGL -lpng -lgpiod
+	gcc src/main.c -o gui -lglfw -lGL -lpng -ljpeg -lgpiod
 run:
 	sudo xinit
 
