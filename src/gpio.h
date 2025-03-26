@@ -15,8 +15,8 @@
 #define GPIO_DOWN    2
 #define GPIO_LED     6
 
-const unsigned int LED_PINS = {GPIO_LED};
-const unsigned int BUTTON_PINS = {GPIO_CLIC, GPIO_CENTER, 
+const unsigned int LED_PINS[1] = {GPIO_LED};
+const unsigned int BUTTON_PINS[6] = {GPIO_CLIC, GPIO_CENTER, 
 	GPIO_LEFT, GPIO_RIGHT, GPIO_UP, GPIO_DOWN};
 
 enum Button {
@@ -26,7 +26,7 @@ enum Button {
 	Right  = 3,
 	Up     = 4,
 	Down   = 5,
-}
+};
 
 
 struct gpiod_chip* chip;
@@ -39,7 +39,7 @@ int button_states[6] = {0};
 
 
 int read_button_states() {
-	gpiod_line_get_value_bulk(&button_lines, &button_states);
+	gpiod_line_get_value_bulk(&button_lines, button_states);
 }
 
 int set_led(int state) {
@@ -79,10 +79,10 @@ void setup_gpio() {
 	
 }
 
-cleanup_gpio() {
+void cleanup_gpio() {
 	gpiod_line_release_bulk(&led_lines);
 	gpiod_line_release_bulk(&button_lines);
-	gpiod_chip_close(chip);
+	//gpiod_chip_close(chip);
 }
 
 

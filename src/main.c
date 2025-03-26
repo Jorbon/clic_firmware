@@ -9,7 +9,13 @@
 #include "gpio.h"
 
 
-
+void clean_exit(int code, char* message) {
+	cleanup_glfw();
+	cleanup_gpio();
+	
+	printf("%s\n", message);
+	exit(code);
+}
 
 
 int main() {

@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "common.h"
+#include "graphics.h"
 
 
 GLFWwindow* window;
@@ -13,7 +14,7 @@ void glfw_error_callback(int error, const char* description) {
 }
 
 
-setup_glfw() {
+void setup_glfw() {
 	glfwSetErrorCallback(glfw_error_callback);
 	if (!glfwInit()) clean_exit(-1, "GLFW failed to initialize. damn.");
 	
@@ -25,7 +26,7 @@ setup_glfw() {
 	glEnable(GL_TEXTURE_2D);
 }
 
-cleanup_glfw() {
+void cleanup_glfw() {
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }

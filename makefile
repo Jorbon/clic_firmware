@@ -1,7 +1,9 @@
 
+libs = -lglfw -lGL -lpng -ljpeg -lgpiod
+warnings = -Wno-discarded-qualifiers
 
 build:
-	gcc src/main.c -o gui -lglfw -lGL -lpng -ljpeg -lgpiod
+	gcc src/main.c -o gui $(libs) $(warnings)
 run:
 	sudo xinit
 

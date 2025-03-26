@@ -86,7 +86,7 @@ Image load_png(char* path) {
 }
 
 
-int load_jpeg(char* path) {
+Image load_jpeg(char* path) {
 	Image img;
 	
 	FILE* file_pointer = fopen(path, "rb");
@@ -126,6 +126,8 @@ int load_jpeg(char* path) {
 	
 	return img;
 }
+
+
 
 
 #endif
