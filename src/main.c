@@ -39,15 +39,22 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		draw_image(test_tex, 0.0, 0.0, 1.0, 1.0);
-		draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 0.1);
-		draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 0.2);
-		draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 0.3);
-		
+		draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 16 * heightf_inv);
+		draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 32 * heightf_inv);
+		draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 48 * heightf_inv);
 		
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		
-		if (glfwGetTime() > 10.0) break;
+		
+		read_button_states();
+		
+		if (button_states[Left]) test_tex = load_generic_image(
+				"/home/clic/clic_firmware/assets/mc.png");
+		if (button_states[Right]) test_tex = load_generic_jpeg(
+				"/home/clic/clic_firmware/test.jpg");
+		
+		if (button_states[Center]) break;
 	}
 	
 	

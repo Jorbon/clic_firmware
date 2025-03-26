@@ -36,8 +36,16 @@ GLuint init_texture(Image img) {
 }
 
 
-GLuint load_generic_image(const char* path) {
+GLuint load_generic_image(char* path) {
 	Image img = load_png(path);
+	GLuint texture = init_texture(img);
+	free(img.data);
+	
+	return texture;
+}
+
+GLuint load_generic_jpeg(char* path) {
+	Image img = load_jpeg(path);
 	GLuint texture = init_texture(img);
 	free(img.data);
 	

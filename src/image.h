@@ -115,10 +115,12 @@ Image load_jpeg(char* path) {
 		return img;
 	}
 	
-	unsigned char* row_pointers[cinfo.output_height];
-	for (int i = 0; i < cinfo.output_height; i++) 
-		row_pointers[i] = img.data + i * img.width * img.channels;
-	jpeg_read_scanlines(&cinfo, row_pointers, cinfo.output_height);
+	unsigned char* row_pointer[1];
+	for (int i = 0; i < cinfo.output_height; i++) {
+		row_pointer[0] = img.data + i * img.width * img.channels;
+		jpeg_read_scanlines(&cinfo, row_pointer, 1);
+	}
+	//jpeg_read_scanlines(&cinfo, row_pointers, cinfo.output_height);
 	
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
