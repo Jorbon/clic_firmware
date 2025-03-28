@@ -27,6 +27,7 @@ void setup_glfw() {
 }
 
 void cleanup_glfw() {
+	glfwMakeContextCurrent(NULL);
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }

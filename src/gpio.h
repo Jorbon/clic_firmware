@@ -40,6 +40,7 @@ int button_states[6] = {0};
 
 int read_button_states() {
 	gpiod_line_get_value_bulk(&button_lines, button_states);
+	button_states[Down] = !button_states[Down];
 }
 
 int set_led(int state) {
