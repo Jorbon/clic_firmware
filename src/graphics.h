@@ -28,6 +28,7 @@ GLuint init_texture(Image img) {
 	
 	GLint format = GL_RGBA;
 	if (img.channels == 3) format = GL_RGB;
+	if (img.channels == 1) format = GL_LUMINANCE;
 	
 	glTexImage2D(GL_TEXTURE_2D, 0, format, img.width, img.height, 
 			0, format, GL_UNSIGNED_BYTE, img.data);

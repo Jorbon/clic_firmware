@@ -17,7 +17,7 @@ typedef struct {
 
 
 Image load_png(char* path) {
-	Image img;
+	Image img = {0};
 	
 	FILE* file_pointer = fopen(path, "rb");
 	if (!file_pointer) {
@@ -87,7 +87,7 @@ Image load_png(char* path) {
 
 
 Image load_jpeg(char* path) {
-	Image img;
+	Image img = {0};
 	
 	FILE* file_pointer = fopen(path, "rb");
 	if (!file_pointer) {
@@ -120,7 +120,6 @@ Image load_jpeg(char* path) {
 		row_pointer[0] = img.data + i * img.width * img.channels;
 		jpeg_read_scanlines(&cinfo, row_pointer, 1);
 	}
-	//jpeg_read_scanlines(&cinfo, row_pointers, cinfo.output_height);
 	
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);

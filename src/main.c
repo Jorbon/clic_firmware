@@ -32,12 +32,13 @@ void clean_exit(int code, char* message) {
 
 
 
+int live_preview = 0;
+
 
 int main() {
 	setup_gpio();
 	setup_glfw();
-	setup_camera();
-	
+	setup_camera(display_width, display_height);
 	
 	
 	test_tex = load_generic_image("/home/clic/clic_firmware/assets/mc.png");
@@ -51,33 +52,55 @@ int main() {
 	
 	while (!glfwWindowShouldClose(window)) {
 		
-		glClear(GL_COLOR_BUFFER_BIT);
-		
-		draw_image(test_tex, 0.0, 0.0, 1.0, 1.0);
-		draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 16 * heightf_inv);
-		draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 32 * heightf_inv);
-		draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 48 * heightf_inv);
-		
-		glfwSwapBuffers(window);
-		glfwPollEvents();
-		
-		
 		read_button_states();
 		
 		if (button_states[Left]) {
+			live_preview = 0;
 			glDeleteTextures(1, &test_tex);
 			test_tex = load_generic_image(
 				"/home/clic/clic_firmware/assets/mc.png");
 		}
-
+		
 		if (button_states[Right]) {
+			live_preview = 0;
 			glDeleteTextures(1, &test_tex);
 			test_tex = load_generic_jpeg(
 				"/home/clic/clic_firmware/test.jpg");
 		}
-		if (button_states[Clic]) system("libcamera-jpeg -o /home/clic/clic_firmware/test.jpg --width 320 --height 240");
-
+		
+		if (button_states[Clic]) {
+			live_preview = 1;
+			glDeleteTextures(1, &test_tex);
+		}
+		
+		set_led(live_preview);
+		
 		if (button_states[Center]) break;
+		
+		
+		if (live_preview) {
+			Image img = get_camera_image();
+			if (img.data) {
+				glDeleteTextures(1, &test_tex);
+				test_tex = init_texture(img);
+				done_with_camera_image();
+			}
+		}
+		
+		
+		glClear(GL_COLOR_BUFFER_BIT);
+		
+		draw_image(test_tex, 0.0, 0.0, 1.0, 1.0);
+		
+		//draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 16 * heightf_inv);
+		//draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 32 * heightf_inv);
+		//draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 48 * heightf_inv);
+		
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+		
+
+		sleep(0.015);
 	}
 	
 	

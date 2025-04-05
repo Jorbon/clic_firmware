@@ -1,5 +1,5 @@
 
-spi_divisor=20
+spi_divisor=6
 
 dc_pin=16
 reset_pin=20
