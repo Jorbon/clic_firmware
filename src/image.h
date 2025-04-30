@@ -8,6 +8,10 @@
 #include "common.h"
 
 
+#define CAMERA_WIDTH 3280
+#define CAMERA_HEIGHT 2464
+
+
 typedef struct {
 	unsigned char* data;
 	unsigned int width;

@@ -48,8 +48,9 @@ int button_states[6] = {0};
 
 
 int read_button_states() {
-	gpiod_line_get_value_bulk(&button_lines, button_states);
+	if (gpiod_line_get_value_bulk(&button_lines, button_states)) return -1;
 	button_states[Down] = !button_states[Down];
+	return 0;
 }
 
 int set_led(int state) {
@@ -67,20 +68,23 @@ int set_backlight(int state) {
 
 
 
-void setup_gpio() {
+int setup_gpio() {
 	int error;
 	
 	struct gpiod_chip* chip = gpiod_chip_open("/dev/gpiochip0");
-	if (!chip) clean_exit(-1, "No gpio chip open. damn.");
+	if (!chip) {
+		fprintf(stderr, "No gpio chip open. damn.");
+		return -1;
+	}
 	
 	error = gpiod_chip_get_lines(chip, BUTTON_PINS, 6, &button_lines);
-	if (error) clean_exit(-1, "No lines. damn.");
+	if (error) { fprintf(stderr, "No lines. damn."); return -1; }
 	error = gpiod_chip_get_lines(chip, LED_PINS, 1, &led_lines);
-	if (error) clean_exit(-1, "No lines. damn.");
+	if (error) { fprintf(stderr, "No lines. damn."); return -1; }
 	error = gpiod_chip_get_lines(chip, RESET_PINS, 1, &reset_lines);
-	if (error) clean_exit(-1, "No lines. damn.");
+	if (error) { fprintf(stderr, "No lines. damn."); return -1; }
 	error = gpiod_chip_get_lines(chip, BACKLIGHT_PINS, 1, &backlight_lines);
-	if (error) clean_exit(-1, "No lines. damn.");
+	if (error) { fprintf(stderr, "No lines. damn."); return -1; }
 	
 	memset(&input_config, 0, sizeof(input_config));
 	input_config.consumer = "clic";
@@ -93,17 +97,17 @@ void setup_gpio() {
 	output_config.flags = 0;
 	
 	error = gpiod_line_request_bulk(&button_lines, &input_config, NULL);
-	if (error) clean_exit(-1, "No get lines. damn.");
+	if (error) { fprintf(stderr, "No get lines. damn."); return -1; }
 	
 	int value = 0;
 	error = gpiod_line_request_bulk(&led_lines, &output_config, &value);
-	if (error) clean_exit(-1, "No get lines. damn.");
+	if (error) { fprintf(stderr, "No get lines. damn."); return -1; }
 	
 	value = 1;
 	error = gpiod_line_request_bulk(&reset_lines, &output_config, &value);
-	if (error) clean_exit(-1, "No get lines. damn.");
+	if (error) { fprintf(stderr, "No get lines. damn."); return -1; }
 	error = gpiod_line_request_bulk(&backlight_lines, &output_config, &value);
-	if (error) clean_exit(-1, "No get lines. damn.");
+	if (error) { fprintf(stderr, "No get lines. damn."); return -1; }
 	
 }
 

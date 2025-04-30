@@ -2,7 +2,7 @@
 #define CLIC_COMMON_H
 
 
-void clean_exit(int code, char* message);
+
 
 
 #endif

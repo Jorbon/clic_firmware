@@ -14,13 +14,19 @@ void glfw_error_callback(int error, const char* description) {
 }
 
 
-void setup_glfw() {
+int setup_glfw() {
 	glfwSetErrorCallback(glfw_error_callback);
-	if (!glfwInit()) clean_exit(-1, "GLFW failed to initialize. damn.");
+	if (!glfwInit()) {
+		fprintf(stderr, "GLFW failed to initialize. damn.");
+		return -1;
+	}
 	
 	window = glfwCreateWindow(display_width, display_height, 
 			"name", NULL, NULL);
-	if (!window) clean_exit(-1, "Failed to create GLFW window. damn.");
+	if (!window) {
+		fprintf(stderr, "Failed to create GLFW window. damn.");
+		return -1;
+	}
 	
 	glfwMakeContextCurrent(window);
 	glEnable(GL_TEXTURE_2D);

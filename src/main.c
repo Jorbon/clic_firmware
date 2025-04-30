@@ -12,82 +12,78 @@
 
 
 
-
-
-GLuint test_tex;
 GLuint font;
+GLuint error_screen;
+GLuint live_image;
 
 
-void clean_exit(int code, char* message) {
-	glDeleteTextures(1, &test_tex);
-	glDeleteTextures(1, &font);
+
+
+void show_error_screen(const char* message) {
+	draw_image(error_screen, 0.0, 0.0, 1.0, 1.0);
+	draw_text(message, font, 0.3, 0.4);
+	glfwSwapBuffers(window);
 	
-	cleanup_camera();
-	cleanup_glfw();
-	cleanup_gpio();
+	while (!glfwWindowShouldClose(window)) {
+		glfwPollEvents();
+		sleep(0.1);
+	}
 	
-	printf("\n%s\n\n", message);
-	exit(code);
+	exit(-1);
 }
 
 
 
-int live_preview = 0;
-
-
 int main() {
-	setup_gpio();
-	setup_glfw();
-	setup_camera(display_width, display_height);
+	if (-1 == setup_glfw()) {
+		printf("Couldn't create a window to show a funny error screen.");
+		exit(-1);
+	}
 	
-	
-	test_tex = load_generic_image("/home/clic/clic_firmware/assets/mc.png");
-	if (!test_tex) clean_exit(-1, "No load test tex. damn.");
 	
 	font = load_font("/home/clic/clic_firmware/assets/consolas16.png");
-	if (!font) clean_exit(-1, "No load font. damn.");
+	if (!font) fprintf(stderr, "Asset not loaded: consolas16.png");
+	
+	error_screen = load_generic_image(
+		"/home/clic/clic_firmware/assets/error.png");
+	if (!error_screen) fprintf(stderr, "Asset not loaded: error.png");
 	
 	
-	glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+	
+	if (-1 == setup_camera(CAMERA_WIDTH, CAMERA_HEIGHT)) 
+			show_error_screen("no camera");
+	
+	if (-1 == setup_gpio()) 
+			show_error_screen("no gpio");
+	
+			
+	if (-1 == set_reset(1) || -1 == set_backlight(1)) 
+			show_error_screen("gpio lost");
+	
+	
 	
 	while (!glfwWindowShouldClose(window)) {
 		
-		read_button_states();
+		if (-1 == read_button_states()) 
+				show_error_screen("gpio lost");
 		
-		if (button_states[Left]) {
-			live_preview = 0;
+		
+		if (-1 == set_led(1)) 
+				show_error_screen("gpio lost");
+		
+		
+		Image img = {0};
+		if (-1 == get_camera_image(&img)) 
+				show_error_screen("camera lost");
+		if (img.data) {
 			glDeleteTextures(1, &test_tex);
-			test_tex = load_generic_image(
-				"/home/clic/clic_firmware/assets/mc.png");
-		}
-		
-		if (button_states[Right]) {
-			live_preview = 0;
-			glDeleteTextures(1, &test_tex);
-			test_tex = load_generic_jpeg(
-				"/home/clic/clic_firmware/test.jpg");
-		}
-		
-		if (button_states[Clic]) {
-			live_preview = 1;
-			glDeleteTextures(1, &test_tex);
-		}
-		
-		set_led(live_preview);
-		
-		if (button_states[Center]) break;
-		
-		
-		if (live_preview) {
-			Image img = get_camera_image();
-			if (img.data) {
-				glDeleteTextures(1, &test_tex);
-				test_tex = init_texture(img);
-				done_with_camera_image();
-			}
+			test_tex = init_texture(img);
+			if (-1 == done_with_camera_image()) 
+					show_error_screen("camera lost");
 		}
 		
 		
+		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		draw_image(test_tex, 0.0, 0.0, 1.0, 1.0);
@@ -104,6 +100,14 @@ int main() {
 	}
 	
 	
-	clean_exit(0, "Clic closed without errors.");
+	
+	glDeleteTextures(1, &test_tex);
+	glDeleteTextures(1, &font);
+	
+	cleanup_camera();
+	cleanup_gpio();
+	cleanup_glfw();
+	
+	printf("Clic closed without errors.");
 	return 0;
 }
