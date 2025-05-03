@@ -113,10 +113,10 @@ int setup_camera(int width, int height) {
 
 	camera_init = 1;
 	
-	// printf("Camera setup for %d x %d '", 
-	// 		camera_output_width, camera_output_height);
-	// fwrite(&format.fmt.pix.pixelformat, 1, 4, stdout);
-	// printf("'\n");
+	printf("Camera setup for %d x %d '", 
+			camera_output_width, camera_output_height);
+	fwrite(&format.fmt.pix.pixelformat, 1, 4, stdout);
+	printf("'\n");
 	
 	return 0;
 }
@@ -144,10 +144,10 @@ int get_camera_image(Image* img) {
 	} else {
 		current_buffer_index = buf.index;
 		currently_using = 1;
-		img.data = camera_buffers[current_buffer_index];
-		img.width = camera_output_width * 5 / 4;
-		img.height = camera_output_height;
-		img.channels = 1; // cursed ik, it's raw10 eww
+		img->data = camera_buffers[current_buffer_index];
+		img->width = camera_output_width * 5 / 4;
+		img->height = camera_output_height;
+		img->channels = 1; // cursed ik, it's raw10 eww
 		return 0;
 	}
 }

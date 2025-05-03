@@ -76,8 +76,8 @@ int main() {
 		if (-1 == get_camera_image(&img)) 
 				show_error_screen("camera lost");
 		if (img.data) {
-			glDeleteTextures(1, &test_tex);
-			test_tex = init_texture(img);
+			glDeleteTextures(1, &live_image);
+			live_image = init_texture(img);
 			if (-1 == done_with_camera_image()) 
 					show_error_screen("camera lost");
 		}
@@ -86,7 +86,7 @@ int main() {
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		draw_image(test_tex, 0.0, 0.0, 1.0, 1.0);
+		draw_image(live_image, 0.0, 0.0, 1.0, 1.0);
 		
 		//draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 16 * heightf_inv);
 		//draw_text("applesauce|\\/*^$@?_<>", font, 0.1, 32 * heightf_inv);
@@ -101,7 +101,7 @@ int main() {
 	
 	
 	
-	glDeleteTextures(1, &test_tex);
+	glDeleteTextures(1, &live_image);
 	glDeleteTextures(1, &font);
 	
 	cleanup_camera();
