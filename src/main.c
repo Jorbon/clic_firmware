@@ -29,6 +29,9 @@ unsigned char review_time = 5;
 #define MAX_QUALITY 10
 unsigned char quality = 8;
 
+#define EXIT_N 5
+unsigned char exit_progress = 0;
+
 
 int capture_mode = 1;
 int capturing = 0;
@@ -197,6 +200,10 @@ int main() {
 					if (quality <= 0) break;
 					quality -= 1;
 					break;
+				case 5:
+					if (exit_progress <= 0) break;
+					exit_progress -= 1;
+					break;
 				}
 			} else if (!delete_confirm) {
 				capture_index += 1;
@@ -244,6 +251,10 @@ int main() {
 					if (quality >= MAX_QUALITY) break;
 					quality += 1;
 					break;
+				case 5:
+					if (exit_progress >= EXIT_N) break;
+					exit_progress += 1;
+					break;
 				}
 			} else if (!delete_confirm) {
 				capture_index -= 1;
@@ -262,7 +273,7 @@ int main() {
 		if (button_states[Up] && !previous_button_states[Up]) {
 			if (capture_mode) {
 				menu_pos -= 1;
-				if (menu_pos < 0) menu_pos = 4;
+				if (menu_pos < 0) menu_pos = 5;
 			} else if (!delete_confirm) {
 				menu_pos -= 1;
 				if (menu_pos < 0) menu_pos = 1;
@@ -272,7 +283,7 @@ int main() {
 		if (button_states[Down] && !previous_button_states[Down]) {
 			if (capture_mode) {
 				menu_pos += 1;
-				if (menu_pos > 4) menu_pos = 0;
+				if (menu_pos > 5) menu_pos = 0;
 			} else if (!delete_confirm) {
 				menu_pos += 1;
 				if (menu_pos > 1) menu_pos = 0;
@@ -316,6 +327,7 @@ int main() {
 				print(6, 5.5, " Capture Timer    %%s  ");
 				print(6, 7.0, " Review Time      %%s  ");
 				print(6, 8.5, " JPEG Quality     %%   ");
+				print(6, 10., " Exit Firmware    %%   ");
 				print(22, 2.5 + 1.5*menu_pos, ">");
 				print(27, 2.5 + 1.5*menu_pos, "<");
 				
@@ -341,30 +353,31 @@ int main() {
 					buf[0] = '0' + quality / 10;
 				else buf[0] = ' ';
 				print(24, 8.5, buf);
+				
+				buf[1] = '0' + exit_progress;
+				buf[0] = ' ';
+				print(24, 10., buf);
 			}
 		} else {
 			draw_image(live_image, 0.0, 0.0, 1.0, 1.0);
 			print(0, 12.0, capture_names[capture_index]);
-			if (menu_pos) {
-				print(6, 7.0, "      > Delete <      ");
-			}
-
+			
 			if (delete_confirm) {
+				print(6, 6.0, "        Delete        ");
 				print(6, 7.0, "                      ");
 				print(6, 8.0, "  > Confirm Delete <  ");
 				print(6, 9.0, "                      ");
+			} else if (menu_pos) {
+				print(6, 6.0, "      > Delete <      ");
 			}
 		}
 		
 		
 		
-		
-		//draw_text("Exposure:", font0, 0.1, 0.0);
-		
-			
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 		
+		if (exit_progress >= EXIT_N) break;
 		
 		sleep(0.015);
 	}

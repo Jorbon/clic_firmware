@@ -28,9 +28,6 @@ int rgbfull_from_raw10(Image* rgb_img, Image raw_img) {
 	int ir1 = ir0 + raw_img.width;
 	int ir2 = ir1 + raw_img.width;
 	
-	int left = 0;
-	int right = 0;
-	
 	for (int y = 0; y < raw_height; y += 2) {
 		for (int x = 0; x < raw_width; x += 4) {
 			
@@ -95,9 +92,11 @@ int rgbfull_from_raw10(Image* rgb_img, Image raw_img) {
 			ir2 += 5;
 		}
 		
+		i0 += raw_width * 3;
 		i1 = i0 + raw_width * 3;
 		in = i0 - raw_width * 3;
 		
+		ir0 += raw_img.width;
 		ir1 = ir0 + raw_img.width;
 		ir2 = ir1 + raw_img.width;
 		if (ir2 >= raw_img.width * raw_img.height) 
