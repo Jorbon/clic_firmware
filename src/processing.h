@@ -6,6 +6,30 @@
 #include "graphics.h"
 
 
+int rotate_image(Image* rotated, Image original) {
+	if (original.data == NULL) return -1;
+	
+	rotated->width = original.width;
+	rotated->height = original.height;
+	rotated->channels = original.channels;
+	
+	int c = original.channels;
+	int data_size = original.width * original.height * original.channels;
+	
+	unsigned char* data = (unsigned char*) malloc(data_size);
+	rotated->data = data;
+	
+	for (int i = 0; i < data_size; i += c) {
+		int i_rev = data_size - c - i;
+		data[i] = original.data[i_rev];
+		data[i+1] = original.data[i_rev+1];
+		data[i+2] = original.data[i_rev+2];
+	}
+	
+	return 0;
+}
+
+
 int rgbfull_from_raw10(Image* rgb_img, Image raw_img) {
 	if (raw_img.data == NULL) return -1;
 	
@@ -122,10 +146,10 @@ int rgbshow_from_raw10(Image* rgb_img, Image raw_img) {
 	rgb_img->data = data;
 	
 	unsigned int i = 0;
-	float xf = 0.0;
-	float yf = 0.0;
 	float xf_inc = widthf_inv;
 	float yf_inc = heightf_inv;
+	float xf = 0.0;
+	float yf = 0.0;
 	
 	for (int y = 0; y < display_height; y++) {
 		int raw_y = (int)(yf * raw_height) & (~1);

@@ -21,13 +21,13 @@ GLuint error_screen;
 GLuint live_image;
 
 #define MAX_GAIN 20
-unsigned char gain = MAX_GAIN / 2;
+unsigned char gain = 1;
 #define MAX_CAPTURE_TIMER 20
 unsigned char capture_timer = 0;
 #define MAX_REVIEW_TIME 20
 unsigned char review_time = 5;
 #define MAX_QUALITY 10
-unsigned char quality = 8;
+unsigned char quality = 9;
 
 #define EXIT_N 5
 unsigned char exit_progress = 0;
@@ -63,7 +63,7 @@ void show_error_screen(const char* message) {
 
 void draw_live_image() {
 	if (glfwGetTime() < review_end_time) {
-		draw_image(live_image, 0.0, 0.0, 1.0, 1.0);
+		draw_image(live_image, 1.0, 1.0, -1.0, -1.0);
 		return;
 	}
 	
@@ -86,13 +86,16 @@ void draw_live_image() {
 		
 		if (capturing && glfwGetTime() > capture_time) {
 			rgbfull_from_raw10(&rgb_img, img);
+			Image rotated_img = {0};
+			rotate_image(&rotated_img, rgb_img);
 			live_image = init_texture(rgb_img);
 			
 			register_capture_path();
-			if (-1 == save_jpeg(capture_path, rgb_img, quality*10)) {
+			if (-1 == save_jpeg(capture_path, rotated_img, quality*10)) {
 				printf("Error saving jpeg to %s\n", 
 					capture_path);
 			}
+			free(rotated_img.data);
 			
 			review_end_time = glfwGetTime() + review_time;
 			capturing = 0;
@@ -101,12 +104,12 @@ void draw_live_image() {
 			live_image = init_texture(rgb_img);
 		}
 		
-		free(rgb_img.data);	
+		free(rgb_img.data);
 		if (-1 == done_with_camera_image()) 
 			show_error_screen("camera lost");
 	}
 	
-	draw_image(live_image, 0.0, 0.0, 1.0, 1.0);
+	draw_image(live_image, 1.0, 1.0, -1.0, -1.0);
 	
 }
 
