@@ -38,14 +38,13 @@ int camera_output_height;
 const enum v4l2_buf_type buf_type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 
 
-// int camera_command(int request, void* argument, char* error_message) {
-// 	if (-1 == xioctl(camera_fd, request, argument)) {
-// 		printf("Camera error: %s - %d, %s\n", c,
-// 			errno, strerror(errno));
-// 		return -1;
-// 	}
-// 	return 0;
-// }
+void camera_command(int request, void* argument, char* error_message) {
+	if (-1 == xioctl(camera_fd, request, argument)) {
+		printf("Camera error: %s - %d, %s\n", error_message,
+			errno, strerror(errno));
+		exit(-1);
+	}
+}
 
 #define CAMERA_COMMAND(a, b, c) if (-1 == xioctl(camera_fd, a, b)) { \
 	fprintf(stderr, "Camera error: %s - %d, %s\n", \
@@ -85,6 +84,12 @@ int setup_camera(int width, int height) {
 	camera_output_height = format.fmt.pix.height;
 	
 	
+	struct v4l2_control c;
+	c.id = 0x009e0903;
+	c.value = 232;
+	CAMERA_COMMAND(VIDIOC_S_CTRL, &c, "Set analog gain");
+	
+	
 	struct v4l2_requestbuffers request = {0};
 	request.count = N_BUFFERS;
 	request.type = buf_type;
@@ -110,7 +115,7 @@ int setup_camera(int width, int height) {
 	}
 	
 	CAMERA_COMMAND(VIDIOC_STREAMON, &buf_type, "Stream on");
-
+	
 	camera_init = 1;
 	
 	printf("Camera setup for %d x %d '", 
@@ -124,11 +129,38 @@ int setup_camera(int width, int height) {
 
 void cleanup_camera() {
 	if (!camera_init) return;
+	
+	camera_command(VIDIOC_STREAMOFF, &buf_type, "Stream off");
+	
 	for (int i = 0; i < N_BUFFERS; i++) 
 		munmap(camera_buffers[i], camera_buffer_size);
 	close(camera_fd);
 	camera_init = 0;
 }
+
+
+
+
+#define GAIN_MIN 256
+#define GAIN_MAX 4095
+
+int set_gain(float gain) {
+	if (!camera_init) return 0;
+	
+	struct v4l2_control c;
+	c.id = 0x009f0905;
+	c.value = (int)(gain * GAIN_MAX);
+	
+	if (c.value < GAIN_MIN) c.value = GAIN_MIN;
+	else if (c.value > GAIN_MAX) c.value = GAIN_MAX;
+	
+	CAMERA_COMMAND(VIDIOC_S_CTRL, &c, "Set digital gain");
+	
+	return 0;
+}
+
+
+
 
 
 int current_buffer_index = 0;
@@ -145,7 +177,11 @@ int get_camera_image(Image* img) {
 		current_buffer_index = buf.index;
 		currently_using = 1;
 		img->data = camera_buffers[current_buffer_index];
-		img->width = camera_output_width * 5 / 4;
+		
+		if (camera_output_width == CAMERA_WIDTH) img->width = 4128;
+		else img->width = camera_output_width * 5 / 4;
+		
+		
 		img->height = camera_output_height;
 		img->channels = 1; // cursed ik, it's raw10 eww
 		return 0;
