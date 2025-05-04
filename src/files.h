@@ -63,7 +63,7 @@ int register_capture_path() {
 	time_t t = time(NULL);
 	struct tm tm = *localtime(&t);
 	sprintf(capture_names[capture_count], 
-		"CLIC_%04d-%02d-%02d_%02d-%02d-%02d\n", 
+		"CLIC_%04d-%02d-%02d_%02d-%02d-%02d.jpg", 
 		tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
 		tm.tm_hour, tm.tm_min, tm.tm_sec);
 	
