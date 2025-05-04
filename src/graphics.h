@@ -86,11 +86,13 @@ void draw_image(GLuint texture, float x, float y, float width, float height) {
 	glEnd();
 }
 
+
+#define CHAR_SIZE 16
+#define CHAR_WIDTH 9
+
 void draw_text(char* text, GLuint font, float x, float y) {
-	unsigned int char_size = 16;
-	unsigned int char_width = 9;
-	float char_sizef = (float) char_size;
-	float char_widthf = (float) char_width;
+	float char_sizef = (float) CHAR_SIZE;
+	float char_widthf = (float) CHAR_WIDTH;
 	float char_sizef_inv = 1.0 / char_sizef;
 	float char_widthf_inv = 1.0 / char_widthf;
 	
@@ -117,6 +119,15 @@ void draw_text(char* text, GLuint font, float x, float y) {
 	}
 	
 	glEnd();
+}
+
+
+GLuint print_font;
+
+void print(float x, float y, char* text) {
+	draw_text(text, print_font, 
+		x * CHAR_WIDTH * widthf_inv, 
+		y * CHAR_SIZE * heightf_inv);
 }
 
 

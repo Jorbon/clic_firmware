@@ -133,6 +133,42 @@ Image load_jpeg(char* path) {
 }
 
 
+#define JPEG_QUALITY 9
+
+int save_jpeg(char* path, Image img) {
+	FILE* file_pointer = fopen(path, "wb");
+	if (!file_pointer) return -1;
+
+	printf("making sure we make it to here\n");
+	
+	struct jpeg_compress_struct cinfo;
+	struct jpeg_error_mgr jerr;
+	
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_compress(&cinfo);
+	jpeg_stdio_dest(&cinfo, file_pointer);
+	
+	cinfo.image_width = img.width;
+	cinfo.image_height = img.height;
+	cinfo.input_components = 3;
+	cinfo.in_color_space = JCS_RGB;
+	jpeg_set_defaults(&cinfo);
+	jpeg_set_quality(&cinfo, 9, TRUE);
+	
+	jpeg_start_compress(&cinfo, TRUE);
+	
+	JSAMPROW row_pointer[1];
+	while (cinfo.next_scanline < cinfo.image_height) {
+		row_pointer[0] = &img.data[cinfo.next_scanline * img.width*3];
+		jpeg_write_scanlines(&cinfo, row_pointer, 1);
+	}
+	
+	jpeg_finish_compress(&cinfo);
+	jpeg_destroy_compress(&cinfo);
+	fclose(file_pointer);
+	return 0;
+}
+
 
 
 #endif

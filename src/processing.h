@@ -36,15 +36,7 @@ int rgbfull_from_raw10(Image* rgb_img, Image raw_img) {
 
 
 int rgbshow_from_raw10(Image* rgb_img, Image raw_img) {
-	if (raw_img.data == NULL) return -1;
-	
-	//for (int i = 0; i < 50; i++) {
-	//	for (int j = 0; j < 10; j++) {
-	//		printf("%d\t", raw_img.data[i*10 + j]);
-	//	}
-	//	printf("\n");
-	//}
-	//exit(0);
+	if (raw_img.data == NULL) return -1;;
 	
 	unsigned int raw_width = raw_img.width / 5 * 4;
 	unsigned int raw_height = raw_img.height;
