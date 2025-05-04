@@ -25,7 +25,9 @@ unsigned char gain = MAX_GAIN / 2;
 #define MAX_CAPTURE_TIMER 20
 unsigned char capture_timer = 0;
 #define MAX_REVIEW_TIME 20
-unsigned char review_time = 3;
+unsigned char review_time = 5;
+#define MAX_QUALITY 10
+unsigned char quality = 8;
 
 
 int capture_mode = 1;
@@ -84,7 +86,7 @@ void draw_live_image() {
 			live_image = init_texture(rgb_img);
 			
 			register_capture_path();
-			if (-1 == save_jpeg(capture_path, rgb_img)) {
+			if (-1 == save_jpeg(capture_path, rgb_img, quality*10)) {
 				printf("Error saving jpeg to %s\n", 
 					capture_path);
 			}
@@ -191,6 +193,10 @@ int main() {
 					if (review_time <= 0) break;
 					review_time -= 1;
 					break;
+				case 4:
+					if (quality <= 0) break;
+					quality -= 1;
+					break;
 				}
 			} else if (!delete_confirm) {
 				capture_index += 1;
@@ -234,6 +240,10 @@ int main() {
 						break;
 					review_time += 1;
 					break;
+				case 4:
+					if (quality >= MAX_QUALITY) break;
+					quality += 1;
+					break;
 				}
 			} else if (!delete_confirm) {
 				capture_index -= 1;
@@ -252,7 +262,7 @@ int main() {
 		if (button_states[Up] && !previous_button_states[Up]) {
 			if (capture_mode) {
 				menu_pos -= 1;
-				if (menu_pos < 0) menu_pos = 3;
+				if (menu_pos < 0) menu_pos = 4;
 			} else if (!delete_confirm) {
 				menu_pos -= 1;
 				if (menu_pos < 0) menu_pos = 1;
@@ -262,7 +272,7 @@ int main() {
 		if (button_states[Down] && !previous_button_states[Down]) {
 			if (capture_mode) {
 				menu_pos += 1;
-				if (menu_pos > 3) menu_pos = 0;
+				if (menu_pos > 4) menu_pos = 0;
 			} else if (!delete_confirm) {
 				menu_pos += 1;
 				if (menu_pos > 1) menu_pos = 0;
@@ -302,28 +312,35 @@ int main() {
 		if (capture_mode) {
 			draw_live_image();
 			if (menu_pos) {
-				print(6, 5.0, " Gain             %%   ");
-				print(6, 6.5, " Capture Timer    %%s  ");
-				print(6, 8.0, " Review Time      %%s  ");
-				print(22, 3.5 + 1.5*menu_pos, ">");
-				print(27, 3.5 + 1.5*menu_pos, "<");
+				print(6, 4.0, " Gain             %%   ");
+				print(6, 5.5, " Capture Timer    %%s  ");
+				print(6, 7.0, " Review Time      %%s  ");
+				print(6, 8.5, " JPEG Quality     %%   ");
+				print(22, 2.5 + 1.5*menu_pos, ">");
+				print(27, 2.5 + 1.5*menu_pos, "<");
 				
 				char buf[3] = "  ";
 				buf[1] = '0' + gain % 10;
 				if (gain >= 10) buf[0] = '0' + gain / 10;
-				print(24, 5.0, buf);
+				print(24, 4.0, buf);
 				
 				buf[1] = '0' + capture_timer % 10;
 				if (capture_timer >= 10) 
 					buf[0] = '0' + capture_timer / 10;
 				else buf[0] = ' ';
-				print(24, 6.5, buf);
+				print(24, 5.5, buf);
 				
 				buf[1] = '0' + review_time % 10;
 				if (review_time >= 10) 
 					buf[0] = '0' + review_time / 10;
 				else buf[0] = ' ';
-				print(24, 8.0, buf);
+				print(24, 7.0, buf);
+				
+				buf[1] = '0' + quality % 10;
+				if (quality >= 10) 
+					buf[0] = '0' + quality / 10;
+				else buf[0] = ' ';
+				print(24, 8.5, buf);
 			}
 		} else {
 			draw_image(live_image, 0.0, 0.0, 1.0, 1.0);

@@ -133,13 +133,9 @@ Image load_jpeg(char* path) {
 }
 
 
-#define JPEG_QUALITY 9
-
-int save_jpeg(char* path, Image img) {
+int save_jpeg(char* path, Image img, int quality) {
 	FILE* file_pointer = fopen(path, "wb");
 	if (!file_pointer) return -1;
-
-	printf("making sure we make it to here\n");
 	
 	struct jpeg_compress_struct cinfo;
 	struct jpeg_error_mgr jerr;
@@ -153,7 +149,7 @@ int save_jpeg(char* path, Image img) {
 	cinfo.input_components = 3;
 	cinfo.in_color_space = JCS_RGB;
 	jpeg_set_defaults(&cinfo);
-	jpeg_set_quality(&cinfo, 9, TRUE);
+	jpeg_set_quality(&cinfo, quality, TRUE);
 	
 	jpeg_start_compress(&cinfo, TRUE);
 	
